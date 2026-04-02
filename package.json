@@ -1,0 +1,33 @@
+{
+  "name": "gui-new-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for gui.new — instant HTML canvas sharing",
+  "type": "module",
+  "bin": {
+    "gui-new-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "gui-new",
+    "html",
+    "canvas",
+    "sharing",
+    "model-context-protocol"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  }
+}

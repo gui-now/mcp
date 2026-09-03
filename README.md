@@ -1,19 +1,19 @@
-# gui-new-mcp
+# gui-now-mcp
 
-MCP server for [gui.new](https://gui.new) — instant HTML canvas sharing.
+MCP server for [gui.now](https://gui.now) — instant HTML canvas sharing.
 
 Create shareable HTML canvases, markdown pages, and multi-frame presentations from any MCP client.
 
 ## Installation
 
 ```bash
-npm install -g gui-new-mcp
+npm install -g gui-now-mcp
 ```
 
 Or run directly:
 
 ```bash
-npx gui-new-mcp
+npx gui-now-mcp
 ```
 
 ### Claude Desktop
@@ -23,11 +23,11 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "gui-new": {
+    "gui-now": {
       "command": "npx",
-      "args": ["-y", "gui-new-mcp"],
+      "args": ["-y", "gui-now-mcp"],
       "env": {
-        "GUI_NEW_API_KEY": "your-api-key"
+        "GUI_NOW_API_KEY": "your-api-key"
       }
     }
   }
@@ -37,13 +37,13 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ### Claude Code
 
 ```bash
-claude mcp add gui-new -- npx -y gui-new-mcp
+claude mcp add gui-now -- npx -y gui-now-mcp
 ```
 
 With a Pro API key:
 
 ```bash
-claude mcp add gui-new -e GUI_NEW_API_KEY=your-key -- npx -y gui-new-mcp
+claude mcp add gui-now -e GUI_NOW_API_KEY=your-key -- npx -y gui-now-mcp
 ```
 
 ## Tools
@@ -85,7 +85,7 @@ Create a multi-frame canvas with multiple HTML panels.
 
 | Env Var | Description |
 |---------|-------------|
-| `GUI_NEW_API_KEY` | Pro API key for higher rate limits (100/hr vs 5/hr), longer expiry, and password protection |
+| `GUI_NOW_API_KEY` | Pro API key for higher rate limits (100/hr vs 5/hr), longer expiry, and password protection |
 
 ## License
 

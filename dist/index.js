@@ -2,8 +2,8 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-const API_BASE = "https://gui.new/api/canvas";
-const API_KEY = process.env.GUI_NEW_API_KEY;
+const API_BASE = "https://gui.now/api/canvas";
+const API_KEY = process.env.GUI_NOW_API_KEY;
 async function callApi(body) {
     const headers = {
         "Content-Type": "application/json",
@@ -40,10 +40,10 @@ function formatResult(data) {
     return lines.join("\n");
 }
 const server = new McpServer({
-    name: "gui-new-mcp",
+    name: "gui-now-mcp",
     version: "1.0.0",
 });
-server.tool("create_canvas", "Create an HTML canvas on gui.new and get a shareable URL", {
+server.tool("create_canvas", "Create an HTML canvas on gui.now and get a shareable URL", {
     html: z.string().describe("Raw HTML content for the canvas"),
     title: z.string().optional().describe("Optional title"),
     theme: z.string().optional().describe("Optional theme"),
@@ -70,7 +70,7 @@ server.tool("create_canvas", "Create an HTML canvas on gui.new and get a shareab
         };
     }
 });
-server.tool("create_markdown_canvas", "Create a markdown canvas on gui.new (rendered server-side) and get a shareable URL", {
+server.tool("create_markdown_canvas", "Create a markdown canvas on gui.now (rendered server-side) and get a shareable URL", {
     markdown: z.string().describe("Markdown content"),
     title: z.string().optional().describe("Optional title"),
     theme: z.string().optional().describe("Optional theme"),
@@ -97,7 +97,7 @@ server.tool("create_markdown_canvas", "Create a markdown canvas on gui.new (rend
         };
     }
 });
-server.tool("create_multi_frame", "Create a multi-frame canvas on gui.new with multiple HTML panels", {
+server.tool("create_multi_frame", "Create a multi-frame canvas on gui.now with multiple HTML panels", {
     frames: z
         .array(z.object({
         html: z.string().describe("HTML content for this frame"),

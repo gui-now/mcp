@@ -1,10 +1,10 @@
 {
-  "name": "gui-new-mcp",
+  "name": "gui-now-mcp",
   "version": "1.0.0",
-  "description": "MCP server for gui.new — instant HTML canvas sharing",
+  "description": "MCP server for gui.now — instant HTML canvas sharing",
   "type": "module",
   "bin": {
-    "gui-new-mcp": "dist/index.js"
+    "gui-now-mcp": "dist/index.js"
   },
   "main": "dist/index.js",
   "files": [
@@ -16,7 +16,7 @@
   },
   "keywords": [
     "mcp",
-    "gui-new",
+    "gui-now",
     "html",
     "canvas",
     "sharing",

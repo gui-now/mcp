@@ -3,7 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 const API_BASE = "https://gui.now/api/canvas";
-const API_KEY = process.env.GUI_NOW_API_KEY;
+const API_KEY = process.env.GUI_NOW_API_KEY || process.env.GUI_NEW_API_KEY;
 async function callApi(body) {
     const headers = {
         "Content-Type": "application/json",

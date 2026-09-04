@@ -3,6 +3,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 const API_BASE = "https://gui.now/api/canvas";
+// GUI_NEW_API_KEY is the pre-rename name; still honoured so existing Pro
+// keys keep working without the user having to re-export anything.
 const API_KEY = process.env.GUI_NOW_API_KEY || process.env.GUI_NEW_API_KEY;
 async function callApi(body) {
     const headers = {

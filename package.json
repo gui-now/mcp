@@ -1,14 +1,16 @@
 {
-  "name": "gui-new-mcp",
+  "name": "gui-now-mcp",
   "version": "1.0.0",
-  "description": "MCP server for gui.new — instant HTML canvas sharing",
+  "description": "MCP server for gui.now \u2014 instant HTML canvas sharing",
   "type": "module",
   "bin": {
-    "gui-new-mcp": "dist/index.js"
+    "gui-now-mcp": "dist/index.js"
   },
   "main": "dist/index.js",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc",
@@ -16,7 +18,7 @@
   },
   "keywords": [
     "mcp",
-    "gui-new",
+    "gui-now",
     "html",
     "canvas",
     "sharing",
@@ -24,10 +26,19 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1"
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.25 || ^4.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gui-now/mcp.git"
+  },
+  "homepage": "https://gui.now",
+  "bugs": {
+    "url": "https://github.com/gui-now/mcp/issues"
   }
 }

@@ -41,6 +41,11 @@ function formatResult(data) {
         `Format: ${data.format}`,
         `Expires: ${data.expires_at}`,
     ];
+    // The edit token is the only way to call update_canvas later and the API
+    // returns it exactly once, here. Omitting it from the tool result left the
+    // client no way to obtain it, which made update_canvas unreachable.
+    if (data.edit_token)
+        lines.push(`Edit token: ${data.edit_token}`);
     if (data.pro)
         lines.push("Pro: yes");
     if (data.password_protected)

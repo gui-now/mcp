@@ -58,6 +58,7 @@ Create an HTML canvas and get a shareable URL.
 | title | string | no | Canvas title |
 | theme | string | no | Theme |
 | expires | string | no | `1h`, `24h`, `7d`, `14d`, `30d` |
+| password | string | no | Pro only: password-protect the canvas |
 
 ### create_markdown_canvas
 
@@ -81,11 +82,47 @@ Create a multi-frame canvas with multiple HTML panels.
 | theme | string | no | Theme |
 | expires | string | no | `1h`, `24h`, `7d`, `14d`, `30d` |
 
+### create_diagram
+
+Render a Mermaid diagram as a pannable, zoomable canvas.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| mermaid | string | yes | Mermaid source, e.g. `graph TD\n  A --> B` |
+| title | string | no | Canvas title |
+| theme | string | no | Theme |
+| expires | string | no | `1h`, `24h`, `7d`, `14d`, `30d` |
+
+### update_canvas
+
+Replace the content of an existing canvas. All viewers see the change immediately.
+Free tier allows 3 edits per canvas; Pro is unlimited.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| canvas_id | string | yes | The canvas id |
+| edit_token | string | yes | Returned when the canvas was created — keep it |
+| html | string | no | Replacement HTML |
+| title | string | no | Replacement title |
+| frames | array | no | Replacement frames |
+
+### extend_canvas
+
+Push a canvas's expiry out to 24 hours from now.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| canvas_id | string | yes | The canvas id |
+
 ## Configuration
 
 | Env Var | Description |
 |---------|-------------|
 | `GUI_NOW_API_KEY` | Pro API key for higher rate limits (100/hr vs 5/hr), longer expiry, and password protection |
+| `GUI_NOW_URL` | Override the API base URL (defaults to `https://gui.now`) |
+
+`GUI_NEW_API_KEY` and `GUI_NEW_URL` are the pre-rename names and are still read
+as fallbacks, so keys exported before the move to gui.now keep working.
 
 ## License
 

@@ -1,6 +1,6 @@
 # gui-now-mcp
 
-MCP server for [gui.now](https://gui.now) — instant HTML canvas sharing.
+MCP server for [GUI](https://gui.now) — instant HTML canvas sharing.
 
 Create shareable HTML canvases, markdown pages, and multi-frame presentations from any MCP client.
 

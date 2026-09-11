@@ -1,0 +1,37 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "now.gui/canvas",
+  "title": "GUI",
+  "description": "Turn HTML, Markdown or Mermaid into a live shareable URL in one call.",
+  "version": "1.0.1",
+  "websiteUrl": "https://gui.now",
+  "repository": {
+    "url": "https://github.com/gui-now/mcp",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://gui.now/icon.svg",
+      "mimeType": "image/svg+xml"
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "gui-now-mcp",
+      "version": "1.0.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GUI_NOW_API_KEY",
+          "description": "Pro API key. Optional - the free tier works without one.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "gui-now-mcp",
   "version": "1.0.0",
-  "description": "MCP server for gui.now \u2014 instant HTML canvas sharing",
+  "description": "MCP server for gui.now — instant HTML canvas sharing",
   "type": "module",
   "bin": {
     "gui-now-mcp": "dist/index.js"
@@ -40,5 +40,6 @@
   "homepage": "https://gui.now",
   "bugs": {
     "url": "https://github.com/gui-now/mcp/issues"
-  }
+  },
+  "mcpName": "now.gui/canvas"
 }

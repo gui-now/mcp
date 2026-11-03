@@ -2,7 +2,13 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createRequire } from "node:module";
 import { z } from "zod";
+
+// Report the published package version, so serverInfo can't drift from npm.
+const { version: PACKAGE_VERSION } = createRequire(import.meta.url)(
+  "../package.json",
+) as { version: string };
 
 // GUI_NEW_URL / GUI_NEW_API_KEY are the pre-rename names; still honoured so
 // existing setups keep working without the user having to re-export anything.
@@ -78,7 +84,7 @@ function formatResult(data: CanvasResponse): string {
 
 const server = new McpServer({
   name: "gui-now-mcp",
-  version: "1.0.0",
+  version: PACKAGE_VERSION,
 });
 
 server.tool(

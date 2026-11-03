@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createRequire } from "node:module";
 import { z } from "zod";
+// Report the published package version, so serverInfo can't drift from npm.
+const { version: PACKAGE_VERSION } = createRequire(import.meta.url)("../package.json");
 // GUI_NEW_URL / GUI_NEW_API_KEY are the pre-rename names; still honoured so
 // existing setups keep working without the user having to re-export anything.
 const BASE_URL = (process.env.GUI_NOW_URL ||
@@ -54,7 +57,7 @@ function formatResult(data) {
 }
 const server = new McpServer({
     name: "gui-now-mcp",
-    version: "1.0.0",
+    version: PACKAGE_VERSION,
 });
 server.tool("create_canvas", "Create an HTML canvas on gui.now and get a shareable URL", {
     html: z.string().describe("Raw HTML content for the canvas"),

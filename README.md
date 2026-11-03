@@ -46,6 +46,28 @@ With a Pro API key:
 claude mcp add gui-now -e GUI_NOW_API_KEY=your-key -- npx -y gui-now-mcp
 ```
 
+### Cursor
+
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=gui-now&config=eyJjb21tYW5kIjoibnB4IC15IGd1aS1ub3ctbWNwIn0%3D)
+
+Or add it to `~/.cursor/mcp.json` yourself:
+
+```json
+{
+  "mcpServers": {
+    "gui-now": {
+      "command": "npx",
+      "args": ["-y", "gui-now-mcp"],
+      "env": {
+        "GUI_NOW_API_KEY": "your-api-key"
+      }
+    }
+  }
+}
+```
+
+The API key is optional. Leave out `env` for the free tier.
+
 ## Tools
 
 ### create_canvas

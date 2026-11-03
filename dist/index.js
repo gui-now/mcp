@@ -2,6 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { buildHeaders, EXPIRES_DESCRIPTION, EXPIRES_PATTERN, extendBody, formatExtend, formatResult, } from "./lib.js";
 // GUI_NEW_URL / GUI_NEW_API_KEY are the pre-rename names; still honoured so
 // existing setups keep working without the user having to re-export anything.
 const BASE_URL = (process.env.GUI_NOW_URL ||
@@ -9,13 +10,11 @@ const BASE_URL = (process.env.GUI_NOW_URL ||
     "https://gui.now").replace(/\/$/, "");
 const API_KEY = process.env.GUI_NOW_API_KEY || process.env.GUI_NEW_API_KEY;
 async function request(method, path, body, extraHeaders = {}) {
-    const headers = {
-        "Content-Type": "application/json",
-        ...extraHeaders,
-    };
-    if (API_KEY) {
-        headers["x-api-key"] = API_KEY;
-    }
+    const headers = buildHeaders({
+        apiKey: API_KEY,
+        agent: server.server.getClientVersion()?.name,
+        extra: extraHeaders,
+    });
     const res = await fetch(`${BASE_URL}${path}`, {
         method,
         headers,
@@ -34,24 +33,11 @@ async function request(method, path, body, extraHeaders = {}) {
 async function callApi(body) {
     return request("POST", "/api/canvas", body);
 }
-function formatResult(data) {
-    const lines = [
-        `URL: ${data.url}`,
-        `ID: ${data.id}`,
-        `Format: ${data.format}`,
-        `Expires: ${data.expires_at}`,
-    ];
-    // The edit token is the only way to call update_canvas later and the API
-    // returns it exactly once, here. Omitting it from the tool result left the
-    // client no way to obtain it, which made update_canvas unreachable.
-    if (data.edit_token)
-        lines.push(`Edit token: ${data.edit_token}`);
-    if (data.pro)
-        lines.push("Pro: yes");
-    if (data.password_protected)
-        lines.push("Password protected: yes");
-    return lines.join("\n");
-}
+const expiresSchema = z
+    .string()
+    .regex(EXPIRES_PATTERN, "Use a duration like '24h' or '7d', or 'never'")
+    .optional()
+    .describe(EXPIRES_DESCRIPTION);
 const server = new McpServer({
     name: "gui-now-mcp",
     version: "1.0.0",
@@ -60,10 +46,7 @@ server.tool("create_canvas", "Create an HTML canvas on gui.now and get a shareab
     html: z.string().describe("Raw HTML content for the canvas"),
     title: z.string().optional().describe("Optional title"),
     theme: z.string().optional().describe("Optional theme"),
-    expires: z
-        .enum(["1h", "24h", "7d", "14d", "30d"])
-        .optional()
-        .describe("Expiry duration (free users locked to 24h)"),
+    expires: expiresSchema,
     password: z
         .string()
         .optional()
@@ -93,10 +76,7 @@ server.tool("create_markdown_canvas", "Create a markdown canvas on gui.now (rend
     markdown: z.string().describe("Markdown content"),
     title: z.string().optional().describe("Optional title"),
     theme: z.string().optional().describe("Optional theme"),
-    expires: z
-        .enum(["1h", "24h", "7d", "14d", "30d"])
-        .optional()
-        .describe("Expiry duration (free users locked to 24h)"),
+    expires: expiresSchema,
 }, async ({ markdown, title, theme, expires }) => {
     try {
         const body = { markdown };
@@ -126,10 +106,7 @@ server.tool("create_multi_frame", "Create a multi-frame canvas on gui.now with m
         .describe("Array of frames"),
     title: z.string().optional().describe("Optional title"),
     theme: z.string().optional().describe("Optional theme"),
-    expires: z
-        .enum(["1h", "24h", "7d", "14d", "30d"])
-        .optional()
-        .describe("Expiry duration (free users locked to 24h)"),
+    expires: expiresSchema,
 }, async ({ frames, title, theme, expires }) => {
     try {
         const body = { frames };
@@ -155,10 +132,7 @@ server.tool("create_diagram", "Render a Mermaid diagram as a pannable, zoomable 
         .describe("Mermaid source, e.g. 'graph TD\\n  A[Start] --> B[End]'"),
     title: z.string().optional().describe("Optional title"),
     theme: z.string().optional().describe("Optional theme"),
-    expires: z
-        .enum(["1h", "24h", "7d", "14d", "30d"])
-        .optional()
-        .describe("Expiry duration (free users locked to 24h)"),
+    expires: expiresSchema,
 }, async ({ mermaid, title, theme, expires }) => {
     try {
         // /api/flow is a legacy alias that only proxies here, so post directly.
@@ -219,16 +193,20 @@ server.tool("update_canvas", "Replace the content of an existing gui.now canvas.
         };
     }
 });
-server.tool("extend_canvas", "Push a gui.now canvas's expiry out to 24 hours from now, so a canvas that is about to lapse stays reachable", {
+server.tool("extend_canvas", "Push a gui.now canvas's expiry forward so it stays reachable. Without an edit token: +24h, and pages without an account stop at 72h after they were made. With the edit_token you can ask for a specific expiry (e.g. '72h', or 'never' with a Pro key), clamped to what the page allows. Pages in someone's library need the edit token.", {
     canvas_id: z.string().describe("The canvas id, e.g. 'abc123'"),
-}, async ({ canvas_id }) => {
+    edit_token: z
+        .string()
+        .optional()
+        .describe("The edit_token returned when the canvas was created"),
+    expires: expiresSchema.describe("New expiry measured from now, e.g. '72h' or 'never'. Needs edit_token."),
+}, async ({ canvas_id, edit_token, expires }) => {
     try {
-        const data = await request("POST", `/api/canvas/${encodeURIComponent(canvas_id)}/extend`, {});
-        return {
-            content: [
-                { type: "text", text: `Extended ${data.id}\nExpires: ${data.expires_at}` },
-            ],
-        };
+        if (expires && !edit_token) {
+            throw new Error("Pass edit_token to choose an expiry; without it extend adds 24h.");
+        }
+        const data = await request("POST", `/api/canvas/${encodeURIComponent(canvas_id)}/extend`, extendBody(expires), edit_token ? { Authorization: `Bearer ${edit_token}` } : {});
+        return { content: [{ type: "text", text: formatExtend(data) }] };
     }
     catch (e) {
         return {

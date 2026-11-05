@@ -38,6 +38,8 @@ export function formatResult(data) {
     // client no way to obtain it, which made update_canvas unreachable.
     if (data.edit_token)
         lines.push(`Edit token: ${data.edit_token}`);
+    if (data.content_hash)
+        lines.push(`Content hash: ${data.content_hash}`);
     if (data.pro)
         lines.push("Pro: yes");
     if (data.password_protected)
@@ -57,4 +59,41 @@ export function formatExtend(data) {
 /** Body for POST /extend: only send expires when the caller asked for one. */
 export function extendBody(expires) {
     return expires ? { expires } : {};
+}
+/**
+ * Body for PUT /api/canvas/<id>. Only fields the caller set are sent, so the
+ * page keeps its password and expiry. Throws on input the API would reject
+ * with a 400, so the agent gets the reason without a round trip.
+ */
+export function updateBody(input) {
+    const sources = ["html", "markdown", "mermaid"].filter((k) => input[k] !== undefined);
+    if (sources.length > 1) {
+        throw new Error(`Send one of html, markdown or mermaid per update, not ${sources.join(" and ")}.`);
+    }
+    const body = {};
+    for (const k of ["html", "markdown", "mermaid", "title", "frames"]) {
+        if (input[k] !== undefined)
+            body[k] = input[k];
+    }
+    if (Object.keys(body).length === 0) {
+        throw new Error("Pass at least one of html, markdown, mermaid, title or frames to change.");
+    }
+    if (input.theme && (input.markdown !== undefined || input.mermaid !== undefined))
+        body.theme = input.theme;
+    return body;
+}
+export function formatUpdate(data) {
+    const lines = [
+        `Updated ${data.id}`,
+        `Changed: ${data.changed.length ? data.changed.join(", ") : "nothing (the page already had this content)"}`,
+    ];
+    if (data.format)
+        lines.push(`Format: ${data.format}`);
+    lines.push(`Content hash: ${data.content_hash}`, `To confirm what's live, compare it with the X-Content-Hash header on /embed/${data.id}.`);
+    if (data.ignored?.length) {
+        lines.push(`Ignored: ${data.ignored.join(", ")} (to change when the page expires, use extend_canvas)`);
+    }
+    if (typeof data.edits_remaining === "number")
+        lines.push(`Edits left: ${data.edits_remaining}`);
+    return lines.join("\n");
 }

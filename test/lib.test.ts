@@ -6,6 +6,8 @@ import {
   extendBody,
   formatExtend,
   formatResult,
+  formatUpdate,
+  updateBody,
 } from "../src/lib.ts";
 
 const base = {
@@ -58,4 +60,48 @@ test("extend only sends expires when asked and formats the result", () => {
   assert.deepEqual(extendBody("7d"), { expires: "7d" });
   assert.equal(formatExtend({ id: "abc", expires_at: null }), "Extended abc\nExpires: never");
   assert.match(formatExtend({ id: "abc", expires_at: "x", expires_clamped: true }), /shortened/);
+});
+
+test("update body takes markdown with theme and keeps fields left out", () => {
+  assert.deepEqual(updateBody({ markdown: "# Hi", theme: "light" }), { markdown: "# Hi", theme: "light" });
+  assert.deepEqual(updateBody({ title: "New" }), { title: "New" });
+  assert.deepEqual(updateBody({ mermaid: "graph TD\n  A-->B" }), { mermaid: "graph TD\n  A-->B" });
+  // No password or expiry is ever sent, so both stay as they are.
+  const b = updateBody({ html: "<p>x</p>" });
+  assert.equal("password" in b, false);
+  assert.equal("expires" in b, false);
+});
+
+test("update body rejects two bodies and empty updates before calling the API", () => {
+  assert.throws(() => updateBody({ html: "a", markdown: "b" }), /one of html, markdown or mermaid/);
+  assert.throws(() => updateBody({}), /at least one of/);
+  assert.throws(() => updateBody({ theme: "dark" }), /at least one of/);
+});
+
+test("update result shows what changed and the content hash", () => {
+  const text = formatUpdate({
+    id: "abc",
+    updated: true,
+    changed: ["html", "title"],
+    ignored: ["expires"],
+    format: "markdown",
+    content_hash: "sha256:abc123",
+    edit_count: 2,
+    edits_remaining: 1,
+  });
+  assert.match(text, /^Updated abc/);
+  assert.match(text, /Changed: html, title/);
+  assert.match(text, /Format: markdown/);
+  assert.match(text, /Content hash: sha256:abc123/);
+  assert.match(text, /X-Content-Hash/);
+  assert.match(text, /Ignored: expires/);
+  assert.match(text, /Edits left: 1/);
+  const same = formatUpdate({ id: "abc", updated: true, changed: [], content_hash: "sha256:1" });
+  assert.match(same, /Changed: nothing/);
+  assert.doesNotMatch(same, /Edits left/);
+});
+
+test("create shows the content hash when the API returns one", () => {
+  assert.match(formatResult({ ...base, content_hash: "sha256:ff" }), /Content hash: sha256:ff/);
+  assert.doesNotMatch(formatResult(base), /Content hash/);
 });

@@ -96,13 +96,19 @@ Render a Mermaid diagram as a pannable, zoomable canvas.
 ### update_canvas
 
 Replace the content of an existing canvas. All viewers see the change immediately.
-Free tier allows 3 edits per canvas; Pro is unlimited.
+Send one of `html`, `markdown` or `mermaid` to replace the body; anything you
+leave out, including the password and expiry, stays as it is. The result lists
+what changed and the page's content hash, the same value `/embed/<id>` sends as
+`X-Content-Hash`. Free tier allows 3 edits per canvas; Pro is unlimited.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | canvas_id | string | yes | The canvas id |
 | edit_token | string | yes | Returned when the canvas was created — keep it |
 | html | string | no | Replacement HTML |
+| markdown | string | no | Replacement Markdown, rendered server-side |
+| mermaid | string | no | Replacement Mermaid diagram |
+| theme | `dark` or `light` | no | For markdown or mermaid; leave out to follow the viewer |
 | title | string | no | Replacement title |
 | frames | array | no | Replacement frames |
 

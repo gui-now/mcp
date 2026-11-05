@@ -2,7 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { buildHeaders, EXPIRES_DESCRIPTION, EXPIRES_PATTERN, extendBody, formatExtend, formatResult, } from "./lib.js";
+import { buildHeaders, EXPIRES_DESCRIPTION, EXPIRES_PATTERN, extendBody, formatExtend, formatResult, formatUpdate, updateBody, } from "./lib.js";
 // GUI_NEW_URL / GUI_NEW_API_KEY are the pre-rename names; still honoured so
 // existing setups keep working without the user having to re-export anything.
 const BASE_URL = (process.env.GUI_NOW_URL ||
@@ -153,12 +153,18 @@ server.tool("create_diagram", "Render a Mermaid diagram as a pannable, zoomable 
         };
     }
 });
-server.tool("update_canvas", "Replace the content of an existing gui.now canvas. Needs the edit_token returned when it was created. Free tier allows 3 edits per canvas; Pro is unlimited. All viewers see the change immediately.", {
+server.tool("update_canvas", "Replace the content of an existing gui.now canvas. Needs the edit_token returned when it was created. Send one of html, markdown or mermaid to replace the body; anything you leave out, including the password and expiry, stays as it is. Returns what changed and a content hash. Free tier allows 3 edits per canvas; Pro is unlimited. All viewers see the change immediately.", {
     canvas_id: z.string().describe("The canvas id, e.g. 'abc123'"),
     edit_token: z
         .string()
         .describe("The edit_token returned when the canvas was created"),
     html: z.string().optional().describe("Replacement HTML"),
+    markdown: z.string().optional().describe("Replacement Markdown, rendered server-side like create_markdown_canvas"),
+    mermaid: z.string().optional().describe("Replacement Mermaid diagram source"),
+    theme: z
+        .enum(["dark", "light"])
+        .optional()
+        .describe("Theme for markdown or mermaid. Leave it out to follow the viewer's setting."),
     title: z.string().optional().describe("Replacement title"),
     frames: z
         .array(z.object({
@@ -167,23 +173,12 @@ server.tool("update_canvas", "Replace the content of an existing gui.now canvas.
     }))
         .optional()
         .describe("Replacement frames"),
-}, async ({ canvas_id, edit_token, html, title, frames }) => {
+}, async ({ canvas_id, edit_token, html, markdown, mermaid, theme, title, frames }) => {
     try {
-        const body = {};
-        if (html !== undefined)
-            body.html = html;
-        if (title !== undefined)
-            body.title = title;
-        if (frames !== undefined)
-            body.frames = frames;
-        if (Object.keys(body).length === 0) {
-            throw new Error("Pass at least one of html, title or frames to change.");
-        }
+        const body = updateBody({ html, markdown, mermaid, theme, title, frames });
         const data = await request("PUT", `/api/canvas/${encodeURIComponent(canvas_id)}`, body, { Authorization: `Bearer ${edit_token}` });
         return {
-            content: [
-                { type: "text", text: `Updated ${canvas_id}\n${JSON.stringify(data, null, 2)}` },
-            ],
+            content: [{ type: "text", text: formatUpdate(data) }],
         };
     }
     catch (e) {
